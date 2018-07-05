@@ -14,17 +14,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
+@Slf4j
 public class CCServiceController {
-	
+
 	private static final String CE_SERVICE_URI = "http://localhost:8000/currency-exchange/from/{from}/to/{to}";
-	
+
 	@Autowired
-	private RestTemplate restTemplate ;
+	private RestTemplate restTemplate;
 
 	@Autowired
 	private CEServiceProxy ceProxy;
-	
+
 	@Autowired
 	Environment environment;
 
@@ -47,12 +50,14 @@ public class CCServiceController {
 		return ccService;
 
 	}
-	
+
 	@GetMapping("/currency-converter-feign/from/{from}/to/{to}/quantity/{quantity}")
 	public CCService convertCurrencyFromFeign(@PathVariable String from, @PathVariable String to,
 			@PathVariable BigDecimal quantity) {
 
 		CCService serviceBean = ceProxy.retrieveExchangeValue(from, to);
+		log.info("{}", serviceBean.getId());
+
 		BigDecimal currencyRate = serviceBean.getConversionRate();
 
 		CCService ccService = new CCService(serviceBean.getId(), from, to, currencyRate, quantity,
